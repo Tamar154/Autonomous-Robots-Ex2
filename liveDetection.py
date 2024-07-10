@@ -83,26 +83,26 @@ def calculate_movement_3d(tvec_current, tvec_target, rvec_current, rvec_target, 
     
     if abs(z_diff) > abs(x_diff) and abs(z_diff) > abs(y_diff):
         if z_diff > 0:
-            return "backward"
+            return "move backward"
         elif z_diff < 0:
-            return "forward"
+            return "move forward"
     
     if abs(x_diff) > abs(y_diff):
         if x_diff > 0:
-            return "right"
+            return "move left"
         elif x_diff < 0:
-            return "left"
+            return "move right"
     else:
         if y_diff > 0:
-            return "down"
+            return "move up"
         elif y_diff < 0:
-            return "up"
+            return "move down"
     
     if abs(yaw_diff) > 0:
         if yaw_diff > 0:
-            return "turn-left"
-        elif yaw_diff < 0:
             return "turn-right"
+        elif yaw_diff < 0:
+            return "turn-left"
 
     return "stay"
 
@@ -130,10 +130,14 @@ def main():
             rvecs, tvecs = aruco_detector.get_aruco_positions(ids, coords)
             if snapshot_coords is not None and snapshot_tvecs is not None:
                 for i in range(len(ids)):
-                    movement_command = calculate_movement_3d(tvecs[i], snapshot_tvecs[i], rvecs[i], snapshot_rvecs[i])
-                    if movement_command != prev_movement_command:
-                        print(f"Frame {frame_id}: Move {movement_command}")
-                        prev_movement_command = movement_command
+                    # Ensure the index is within range for all lists
+                    if i < len(tvecs) and i < len(snapshot_tvecs) and i < len(rvecs) and i < len(snapshot_rvecs):
+                        movement_command = calculate_movement_3d(tvecs[i], snapshot_tvecs[i], rvecs[i], snapshot_rvecs[i])
+                        if movement_command != prev_movement_command:
+                            print(f"Frame {frame_id}:  {movement_command}")
+                            prev_movement_command = movement_command
+                    else:
+                        print(f"Take another snapshot with a valid aruco in the frame")
 
         aruco_detector.draw_arucos(frame, coords, ids)
         cv2.imshow('Frame', frame)
